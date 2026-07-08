@@ -7,9 +7,11 @@
   "scripts": {
     "cy:open": "cypress open",
     "cy:run": "cypress run",
-    "test": "cypress run",
-    "test:api": "cypress run --spec 'cypress/e2e/api/**/*.cy.js'",
-    "test:ui": "cypress run --spec 'cypress/e2e/ui/**/*.cy.js'",
+    "cy:run:api": "cypress run --spec \"cypress/e2e/api/**/*.cy.js\"",
+    "api:start": "serverest --port 3000",
+    "test": "start-server-and-test api:start http://localhost:3000/usuarios cy:run",
+    "test:api": "start-server-and-test api:start http://localhost:3000/usuarios cy:run:api",
+    "test:ui": "cypress run --spec \"cypress/e2e/ui/**/*.cy.js\"",
     "lint": "eslint .",
     "format": "prettier --write ."
   },
@@ -28,6 +30,8 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-cypress": "^6.4.2",
     "globals": "^17.7.0",
-    "prettier": "^3.9.4"
+    "prettier": "^3.9.4",
+    "serverest": "^3.2.0",
+    "start-server-and-test": "^3.0.11"
   }
 }

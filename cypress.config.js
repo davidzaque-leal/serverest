@@ -15,8 +15,10 @@ module.exports = defineConfig({
     },
     video: false,
     env: {
-      // URL base da API (usada por cy.request nos testes de API)
-      apiUrl: 'https://serverest.dev',
+      // URL base da API usada por cy.request nos testes de API.
+      // Padrão: ServeRest local (determinístico). Pode ser sobrescrito para a
+      // instância pública com: CYPRESS_apiUrl=https://serverest.dev
+      apiUrl: 'http://localhost:3000',
     },
     setupNodeEvents(on, config) {
       return config;
