@@ -1,0 +1,25 @@
+{
+  "name": "serverest-cypress-tests",
+  "version": "1.0.0",
+  "description": "Testes E2E (UI) e de API para a aplicacao ServeRest usando Cypress e JavaScript",
+  "author": "Davidzaque",
+  "license": "MIT",
+  "scripts": {
+    "cy:open": "cypress open",
+    "cy:run": "cypress run",
+    "test": "cypress run",
+    "test:api": "cypress run --spec 'cypress/e2e/api/**/*.cy.js'",
+    "test:ui": "cypress run --spec 'cypress/e2e/ui/**/*.cy.js'",
+    "lint": "eslint .",
+    "format": "prettier --write ."
+  },
+  "keywords": [
+    "cypress",
+    "e2e",
+    "api",
+    "testing",
+    "serverest",
+    "javascript"
+  ],
+  "devDependencies": {}
+}
