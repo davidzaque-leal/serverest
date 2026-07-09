@@ -11,28 +11,28 @@ to the underlying analysis and automated characterization tests live in
 
 ## Legend
 
-| Field        | Values                                                                                                                                                  |
-| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Severity** | 🔴 High · 🟠 Medium · 🟡 Low · ⚪ Info (not a defect, documented for completeness)                                                                        |
+| Field        | Values                                                                                                                                                         |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Severity** | 🔴 High · 🟠 Medium · 🟡 Low · ⚪ Info (not a defect, documented for completeness)                                                                             |
 | **Status**   | ✅ Confirmed (reproduced locally) · ❓ Unconfirmed (reported, not reproduced) · 📌 By design (accepted for a training app, would be a finding in a real audit) |
 
 ## Summary
 
-| ID      | Title                                                                    | Severity | Status       |
-| ------- | ------------------------------------------------------------------------- | -------- | ------------ |
-| BUG-01  | Shopping List: decreasing quantity to 0 does not remove the item          | 🟠       | ✅ Confirmed |
-| BUG-02  | `DELETE /usuarios/:id` does not validate id format (inconsistent with `GET`) | 🟡       | ✅ Confirmed |
-| BUG-03  | `nome` accepts a whitespace-only value on user registration               | 🟡       | ✅ Confirmed |
-| BUG-04  | `nome` has no maximum length on user registration                         | 🟡       | ✅ Confirmed |
-| BUG-05  | Inconsistent boundary semantics between `preco` and `quantidade`          | 🟡       | ✅ Confirmed |
-| BUG-06  | Any account can self-register as `administrador:"true"` via the API       | 🔴       | 📌 By design |
-| BUG-07  | No rate limiting / lockout on repeated failed logins                      | 🟠       | 📌 By design |
-| BUG-08  | No fallback UI when the backend is unreachable (observed `503`)           | 🟠       | ✅ Confirmed |
-| BUG-09  | Front-end HTTP calls have no request timeout configured                   | 🟠       | ✅ Confirmed |
-| BUG-10  | Forms have no loading state / duplicate-submit protection                 | 🟡       | ✅ Confirmed |
-| BUG-11  | "Adicionar no carrinho" does not complete a working cart flow             | ⚪       | 📌 By design (known limitation) |
-| BUG-12  | Relatórios (Reports) screen is not implemented                            | ⚪       | 📌 By design (known limitation) |
-| BUG-13  | Listar Usuários: newly registered users allegedly missing from the list   | ⚪       | ❓ Unconfirmed |
+| ID     | Title                                                                        | Severity | Status                          |
+| ------ | ---------------------------------------------------------------------------- | -------- | ------------------------------- |
+| BUG-01 | Shopping List: decreasing quantity to 0 does not remove the item             | 🟠       | ✅ Confirmed                    |
+| BUG-02 | `DELETE /usuarios/:id` does not validate id format (inconsistent with `GET`) | 🟡       | ✅ Confirmed                    |
+| BUG-03 | `nome` accepts a whitespace-only value on user registration                  | 🟡       | ✅ Confirmed                    |
+| BUG-04 | `nome` has no maximum length on user registration                            | 🟡       | ✅ Confirmed                    |
+| BUG-05 | Inconsistent boundary semantics between `preco` and `quantidade`             | 🟡       | ✅ Confirmed                    |
+| BUG-06 | Any account can self-register as `administrador:"true"` via the API          | 🔴       | 📌 By design                    |
+| BUG-07 | No rate limiting / lockout on repeated failed logins                         | 🟠       | 📌 By design                    |
+| BUG-08 | No fallback UI when the backend is unreachable (observed `503`)              | 🟠       | ✅ Confirmed                    |
+| BUG-09 | Front-end HTTP calls have no request timeout configured                      | 🟠       | ✅ Confirmed                    |
+| BUG-10 | Forms have no loading state / duplicate-submit protection                    | 🟡       | ✅ Confirmed                    |
+| BUG-11 | "Adicionar no carrinho" does not complete a working cart flow                | ⚪       | 📌 By design (known limitation) |
+| BUG-12 | Relatórios (Reports) screen is not implemented                               | ⚪       | 📌 By design (known limitation) |
+| BUG-13 | Listar Usuários: newly registered users allegedly missing from the list      | ⚪       | ❓ Unconfirmed                  |
 
 ---
 
@@ -43,6 +43,7 @@ to the underlying analysis and automated characterization tests live in
 **Area:** Shopping List (`/home` → add product → Lista de Compras)
 
 **Steps to reproduce:**
+
 1. Log in as a regular user (`administrador:"false"`).
 2. Add one product to the Shopping List from `/home` (quantity becomes 1).
 3. On the Shopping List screen, click `-` on that item to decrease its quantity from 1 to 0.
@@ -68,6 +69,7 @@ The filter predicate never matches, so nothing is ever removed by the decrement 
 **Area:** `DELETE /usuarios/:id`
 
 **Steps to reproduce:**
+
 1. Call `GET /usuarios/:id` with a malformed id (not exactly 16 alphanumeric characters).
 2. Call `DELETE /usuarios/:id` with the same malformed id.
 

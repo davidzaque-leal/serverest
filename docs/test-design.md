@@ -135,24 +135,26 @@ selectively automated based on the candidate analysis in [Section 6](#6-ui-autom
 
 ## 5. Traceability summary
 
-| Flow                          | Automated scenarios                                                                                                                                                                                   | File                                        |
-| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
-| User Registration (API)       | Create success (admin + non-admin), duplicate e-mail, missing fields, invalid e-mail, invalid `administrador`, blank/long `nome`, malformed JSON, id boundary, GET/DELETE id-validation inconsistency | `cypress/e2e/api/users.cy.js`               |
-| User Registration (UI)        | Happy path + redirect, duplicate e-mail inline error                                                                                                                                                  | `cypress/e2e/ui/register-user.cy.js`        |
-| Login (API)                   | Authenticate success, wrong password, non-existent e-mail, missing email, missing password                                                                                                            | `cypress/e2e/api/login.cy.js`               |
-| Login (UI)                    | Authenticate + redirect (regular user), admin login + redirect, invalid credentials + error message                                                                                                   | `cypress/e2e/ui/login.cy.js`                |
-| Product Registration (API)    | Create with valid token, reject without token, non-admin 403, duplicate name, `preco`/`quantidade` boundaries, invalid/malformed token, non-numeric `preco`, public read                              | `cypress/e2e/api/products.cy.js`            |
-| Product Registration (UI)     | Admin happy path + redirect to the product listing page                                                                                                                                               | `cypress/e2e/ui/product-registration.cy.js` |
-| User Registration (UI, admin) | Admin registers a user via Cadastrar Usuários, row visible in Listar Usuários + confirmed via API                                                                                                     | `cypress/e2e/ui/admin-register-user.cy.js`  |
-| Shopping List (UI)            | Add product, sum quantity on repeat adds, update quantity via +/-, clear list, decrease-to-zero characterization test (real bug)                                                                      | `cypress/e2e/ui/shopping-list.cy.js`        |
-| UI access                     | Login screen loads with all elements                                                                                                                                                                  | `cypress/e2e/ui/login-access.cy.js`         |
+| Flow                          | Automated scenarios                                                                                                                                                                                   | File                                          |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| User Registration (API)       | Create success (admin + non-admin), duplicate e-mail, missing fields, invalid e-mail, invalid `administrador`, blank/long `nome`, malformed JSON, id boundary, GET/DELETE id-validation inconsistency | `cypress/e2e/api/users.cy.js`                 |
+| User Registration (UI)        | Happy path + redirect, duplicate e-mail inline error                                                                                                                                                  | `cypress/e2e/ui/register-user.cy.js`          |
+| Login (API)                   | Authenticate success, wrong password, non-existent e-mail, missing email, missing password                                                                                                            | `cypress/e2e/api/login.cy.js`                 |
+| Login (UI)                    | Authenticate + redirect (regular user), admin login + redirect, invalid credentials + error message                                                                                                   | `cypress/e2e/ui/login.cy.js`                  |
+| Product Registration (API)    | Create with valid token, reject without token, non-admin 403, duplicate name, `preco`/`quantidade` boundaries, invalid/malformed token, non-numeric `preco`, public read                              | `cypress/e2e/api/products.cy.js`              |
+| Product Registration (UI)     | Admin happy path + redirect to the product listing page                                                                                                                                               | `cypress/e2e/ui/product-registration.cy.js`   |
+| User Registration (UI, admin) | Admin registers a user via Cadastrar Usuários, row visible in Listar Usuários + confirmed via API                                                                                                     | `cypress/e2e/ui/admin-register-user.cy.js`    |
+| Shopping List (UI)            | Add product, sum quantity on repeat adds, update quantity via +/-, clear list, decrease-to-zero characterization test (real bug)                                                                      | `cypress/e2e/ui/shopping-list.cy.js`          |
+| Product Listing & Search (UI) | Catalog lists a registered product, search filters to the matching product only, "no results" message on a non-matching search                                                                        | `cypress/e2e/ui/product-listing-search.cy.js` |
+| UI access                     | Login screen loads with all elements                                                                                                                                                                  | `cypress/e2e/ui/login-access.cy.js`           |
 
 **Every API scenario identified in Sections 1–4 is now automated** (30 API test cases across 3
 files), except the handful explicitly marked 📋 with a stated rationale (session expiration
 requires real elapsed time; true concurrency needs bypassing Cypress's serial command queue). All
 three core UI flows (user registration, login, product registration) now have dedicated
-end-to-end coverage, plus admin user registration and the shopping list add/remove flow from
-Section 7 (13 UI test cases across 6 files), per the priorities set in Section 6.
+end-to-end coverage, plus admin user registration, the shopping list add/remove flow, and product
+listing/search from Section 7 (16 UI test cases across 7 files), per the priorities set in
+Section 6.
 Items marked ⚠️ are genuine gaps/inconsistencies found in the ServeRest application itself while
 probing it for this analysis — not defects in this test suite.
 
@@ -168,7 +170,7 @@ flaky. This section scores each remaining candidate flow by automation value.
 | ------------------------------------------------------------------ | -------------------------------------------------------------------------------- | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
 | **User registration form** (happy path + inline validation errors) | High — this is the first thing a new user does; broken form = lost signups       | Field rules already proven at API level           | Low (reuses `LoginPage`-style POM, one new page object)                                                                            | ✅ Automated — `register-user.cy.js`                                                                                                    |
 | **Product registration form** (admin happy path)                   | Medium — admin-only, internal tool feel                                          | Field rules already proven at API level           | Low–medium (needs login-as-admin setup + new page object)                                                                          | ✅ Automated — `product-registration.cy.js`                                                                                             |
-| **Product listing / search** (`/listarprodutos`)                   | Medium — broken search blocks all shopping-cart flows downstream                 | Read endpoint already covered (`products.cy.js`)  | Low                                                                                                                                | 📋 good next candidate for a future iteration                                                                                           |
+| **Product listing / search** (`/home` catalog + `pesquisar`)       | Medium — broken search blocks all shopping-cart flows downstream                 | Read endpoint already covered (`products.cy.js`)  | Low                                                                                                                                | ✅ Automated — `product-listing-search.cy.js`                                                                                           |
 | **Duplicate-submit / button-lock on forms**                        | Low-medium — mostly a data-integrity nuisance, not a blocker                     | None (API already rejects duplicates server-side) | Medium (needs to race a real double-click, inherently a bit flaky)                                                                 | 📋 defer — server-side duplicate rejection is the real safety net                                                                       |
 | **Session-expiry redirect** (protected route after token expires)  | Medium — confusing dead-end UX if it silently fails                              | None                                              | High (needs a fast way to force an expired token — e.g. seed `localStorage` with a pre-expired JWT rather than waiting 10 minutes) | 📋 worth doing with the `localStorage` trick, deferred for a future iteration                                                           |
 | **Network-failure UI states** (`cy.intercept` forced errors)       | Medium — this project _lived_ this exact failure mode with the public API        | None                                              | Low (Cypress has first-class support via `cy.intercept`)                                                                           | 📋 high value given the real outage this project experienced with the public API, good candidate for a 4th UI test if the suite expands |
@@ -222,6 +224,22 @@ indefinitely. Root cause read directly from `ServeRest/front` source
 items only ever have `_id` — so the filter predicate never matches and nothing is removed. Only
 "Limpar Lista" (`removeAll`, which just overwrites the whole array) works. Captured as a
 characterization test in `shopping-list.cy.js`'s "Known gaps" context.
+
+### Product listing & search (regular user)
+
+Correction to the candidate list in Section 6: the search feature (`data-testid="pesquisar"` /
+`"botaoPesquisar"`) lives on the **regular user's `/home` catalog** (`CardList` component), not
+on the admin's `/admin/listarprodutos` screen — that admin screen is a plain table with
+edit/delete actions and no search input, read directly from `ServeRest/front` source
+(`src/views/admin/showProducts.js` vs. `src/component/CardList.js`). Typing a term and clicking
+"Pesquisar" calls `GET /produtos?nome=<term>` (a substring match on the server) and re-renders the
+grid; a term matching nothing renders the literal message "Nenhum produto foi encontrado" (no
+dedicated `data-testid`, matched by its copy).
+
+✅ Automated in `product-listing-search.cy.js`: the catalog lists a freshly registered product;
+searching by (a substring of) its name filters the grid down to that product and hides an
+unrelated one created in the same run; searching a guaranteed-nonexistent term shows the "no
+results" message and no product cards.
 
 ### Admin: Relatórios (Reports)
 

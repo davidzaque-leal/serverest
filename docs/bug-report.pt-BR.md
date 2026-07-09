@@ -11,28 +11,28 @@ caracterização automatizados estão em [`test-design.pt-BR.md`](test-design.pt
 
 ## Legenda
 
-| Campo             | Valores                                                                                                                                              |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Severidade**    | 🔴 Alta · 🟠 Média · 🟡 Baixa · ⚪ Informativo (não é um defeito, documentado por completude)                                                            |
-| **Status**        | ✅ Confirmado (reproduzido localmente) · ❓ Não confirmado (relatado, não reproduzido) · 📌 Por design (aceito para uma aplicação de treinamento, seria um achado em uma auditoria real) |
+| Campo          | Valores                                                                                                                                                                                  |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Severidade** | 🔴 Alta · 🟠 Média · 🟡 Baixa · ⚪ Informativo (não é um defeito, documentado por completude)                                                                                            |
+| **Status**     | ✅ Confirmado (reproduzido localmente) · ❓ Não confirmado (relatado, não reproduzido) · 📌 Por design (aceito para uma aplicação de treinamento, seria um achado em uma auditoria real) |
 
 ## Resumo
 
-| ID     | Título                                                                        | Severidade | Status         |
-| ------ | -------------------------------------------------------------------------------- | ---------- | -------------- |
-| BUG-01 | Lista de Compras: reduzir a quantidade a 0 não remove o item                     | 🟠         | ✅ Confirmado  |
-| BUG-02 | `DELETE /usuarios/:id` não valida o formato do id (inconsistente com o `GET`)     | 🟡         | ✅ Confirmado  |
-| BUG-03 | `nome` aceita valor apenas com espaços no cadastro de usuário                    | 🟡         | ✅ Confirmado  |
-| BUG-04 | `nome` não tem tamanho máximo no cadastro de usuário                             | 🟡         | ✅ Confirmado  |
-| BUG-05 | Semântica de limite inconsistente entre `preco` e `quantidade`                   | 🟡         | ✅ Confirmado  |
-| BUG-06 | Qualquer conta pode se autocadastrar como `administrador:"true"` via API         | 🔴         | 📌 Por design  |
-| BUG-07 | Sem rate limiting / bloqueio após logins inválidos repetidos                     | 🟠         | 📌 Por design  |
-| BUG-08 | Sem UI de fallback quando o backend está inacessível (`503` observado)           | 🟠         | ✅ Confirmado  |
-| BUG-09 | Chamadas HTTP do front-end não têm timeout de requisição configurado             | 🟠         | ✅ Confirmado  |
-| BUG-10 | Formulários sem estado de carregamento / proteção contra envio duplicado         | 🟡         | ✅ Confirmado  |
-| BUG-11 | "Adicionar no carrinho" não completa um fluxo de carrinho funcional              | ⚪         | 📌 Por design (limitação conhecida) |
-| BUG-12 | Tela de Relatórios não está implementada                                         | ⚪         | 📌 Por design (limitação conhecida) |
-| BUG-13 | Listar Usuários: usuários recém-cadastrados supostamente ausentes da listagem    | ⚪         | ❓ Não confirmado |
+| ID     | Título                                                                        | Severidade | Status                              |
+| ------ | ----------------------------------------------------------------------------- | ---------- | ----------------------------------- |
+| BUG-01 | Lista de Compras: reduzir a quantidade a 0 não remove o item                  | 🟠         | ✅ Confirmado                       |
+| BUG-02 | `DELETE /usuarios/:id` não valida o formato do id (inconsistente com o `GET`) | 🟡         | ✅ Confirmado                       |
+| BUG-03 | `nome` aceita valor apenas com espaços no cadastro de usuário                 | 🟡         | ✅ Confirmado                       |
+| BUG-04 | `nome` não tem tamanho máximo no cadastro de usuário                          | 🟡         | ✅ Confirmado                       |
+| BUG-05 | Semântica de limite inconsistente entre `preco` e `quantidade`                | 🟡         | ✅ Confirmado                       |
+| BUG-06 | Qualquer conta pode se autocadastrar como `administrador:"true"` via API      | 🔴         | 📌 Por design                       |
+| BUG-07 | Sem rate limiting / bloqueio após logins inválidos repetidos                  | 🟠         | 📌 Por design                       |
+| BUG-08 | Sem UI de fallback quando o backend está inacessível (`503` observado)        | 🟠         | ✅ Confirmado                       |
+| BUG-09 | Chamadas HTTP do front-end não têm timeout de requisição configurado          | 🟠         | ✅ Confirmado                       |
+| BUG-10 | Formulários sem estado de carregamento / proteção contra envio duplicado      | 🟡         | ✅ Confirmado                       |
+| BUG-11 | "Adicionar no carrinho" não completa um fluxo de carrinho funcional           | ⚪         | 📌 Por design (limitação conhecida) |
+| BUG-12 | Tela de Relatórios não está implementada                                      | ⚪         | 📌 Por design (limitação conhecida) |
+| BUG-13 | Listar Usuários: usuários recém-cadastrados supostamente ausentes da listagem | ⚪         | ❓ Não confirmado                   |
 
 ---
 
@@ -43,6 +43,7 @@ caracterização automatizados estão em [`test-design.pt-BR.md`](test-design.pt
 **Área:** Lista de Compras (`/home` → adicionar produto → Lista de Compras)
 
 **Passos para reproduzir:**
+
 1. Fazer login como usuário comum (`administrador:"false"`).
 2. Adicionar um produto à Lista de Compras a partir de `/home` (quantidade vira 1).
 3. Na tela da Lista de Compras, clicar em `-` no item para reduzir a quantidade de 1 para 0.
@@ -69,6 +70,7 @@ decremento.
 **Área:** `DELETE /usuarios/:id`
 
 **Passos para reproduzir:**
+
 1. Chamar `GET /usuarios/:id` com um id malformado (não exatamente 16 caracteres alfanuméricos).
 2. Chamar `DELETE /usuarios/:id` com o mesmo id malformado.
 

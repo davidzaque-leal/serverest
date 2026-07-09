@@ -136,26 +136,28 @@ análise de candidatos na [Seção 6](#6-análise-de-candidatos-à-automação-d
 
 ## 5. Resumo de rastreabilidade
 
-| Fluxo                           | Cenários automatizados                                                                                                                                                                                                       | Arquivo                                     |
-| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
-| Cadastro de Usuário (API)       | Criação com sucesso (admin + não-admin), e-mail duplicado, campos ausentes, e-mail inválido, `administrador` inválido, `nome` vazio/longo, JSON malformado, limite de id, inconsistência de validação de id entre GET/DELETE | `cypress/e2e/api/users.cy.js`               |
-| Cadastro de Usuário (UI)        | Fluxo principal + redirecionamento, erro inline de e-mail duplicado                                                                                                                                                          | `cypress/e2e/ui/register-user.cy.js`        |
-| Login (API)                     | Autenticação com sucesso, senha errada, e-mail inexistente, e-mail ausente, senha ausente                                                                                                                                    | `cypress/e2e/api/login.cy.js`               |
-| Login (UI)                      | Autenticação + redirecionamento (usuário comum), login admin + redirecionamento, credenciais inválidas + mensagem de erro                                                                                                    | `cypress/e2e/ui/login.cy.js`                |
-| Cadastro de Produto (API)       | Criação com token válido, rejeição sem token, 403 não-admin, nome duplicado, limites de `preco`/`quantidade`, token inválido/malformado, `preco` não numérico, leitura pública                                               | `cypress/e2e/api/products.cy.js`            |
-| Cadastro de Produto (UI)        | Fluxo principal do admin + redirecionamento para a listagem de produtos                                                                                                                                                      | `cypress/e2e/ui/product-registration.cy.js` |
-| Cadastro de Usuário (UI, admin) | Admin cadastra um usuário via Cadastrar Usuários, linha visível em Listar Usuários + confirmado via API                                                                                                                      | `cypress/e2e/ui/admin-register-user.cy.js`  |
-| Lista de Compras (UI)           | Adicionar produto, somar quantidade em adições repetidas, atualizar quantidade via +/-, limpar lista, teste de caracterização da redução a zero (bug real)                                                                   | `cypress/e2e/ui/shopping-list.cy.js`        |
-| Acesso à UI                     | Tela de login carrega com todos os elementos                                                                                                                                                                                 | `cypress/e2e/ui/login-access.cy.js`         |
+| Fluxo                             | Cenários automatizados                                                                                                                                                                                                       | Arquivo                                       |
+| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| Cadastro de Usuário (API)         | Criação com sucesso (admin + não-admin), e-mail duplicado, campos ausentes, e-mail inválido, `administrador` inválido, `nome` vazio/longo, JSON malformado, limite de id, inconsistência de validação de id entre GET/DELETE | `cypress/e2e/api/users.cy.js`                 |
+| Cadastro de Usuário (UI)          | Fluxo principal + redirecionamento, erro inline de e-mail duplicado                                                                                                                                                          | `cypress/e2e/ui/register-user.cy.js`          |
+| Login (API)                       | Autenticação com sucesso, senha errada, e-mail inexistente, e-mail ausente, senha ausente                                                                                                                                    | `cypress/e2e/api/login.cy.js`                 |
+| Login (UI)                        | Autenticação + redirecionamento (usuário comum), login admin + redirecionamento, credenciais inválidas + mensagem de erro                                                                                                    | `cypress/e2e/ui/login.cy.js`                  |
+| Cadastro de Produto (API)         | Criação com token válido, rejeição sem token, 403 não-admin, nome duplicado, limites de `preco`/`quantidade`, token inválido/malformado, `preco` não numérico, leitura pública                                               | `cypress/e2e/api/products.cy.js`              |
+| Cadastro de Produto (UI)          | Fluxo principal do admin + redirecionamento para a listagem de produtos                                                                                                                                                      | `cypress/e2e/ui/product-registration.cy.js`   |
+| Cadastro de Usuário (UI, admin)   | Admin cadastra um usuário via Cadastrar Usuários, linha visível em Listar Usuários + confirmado via API                                                                                                                      | `cypress/e2e/ui/admin-register-user.cy.js`    |
+| Lista de Compras (UI)             | Adicionar produto, somar quantidade em adições repetidas, atualizar quantidade via +/-, limpar lista, teste de caracterização da redução a zero (bug real)                                                                   | `cypress/e2e/ui/shopping-list.cy.js`          |
+| Listagem e Busca de Produtos (UI) | Catálogo lista um produto cadastrado, busca filtra apenas o produto correspondente, mensagem de "nenhum resultado" em busca sem correspondência                                                                              | `cypress/e2e/ui/product-listing-search.cy.js` |
+| Acesso à UI                       | Tela de login carrega com todos os elementos                                                                                                                                                                                 | `cypress/e2e/ui/login-access.cy.js`           |
 
 **Todo cenário de API identificado nas Seções 1–4 está automatizado** (30 casos de teste de API
 em 3 arquivos), com exceção do punhado explicitamente marcado com 📋 e justificativa (expiração
 de sessão exige tempo real decorrido; concorrência verdadeira exige contornar a fila serial de
 comandos do Cypress). Os três fluxos centrais de UI (cadastro de usuário, login, cadastro de
-produto) agora têm cobertura end-to-end dedicada, além do cadastro de usuário pelo admin e do
-fluxo de adição/remoção na Lista de Compras da Seção 7 (13 casos de teste de UI em 6 arquivos),
-conforme as prioridades definidas na Seção 6. Itens marcados com ⚠️ são lacunas/inconsistências
-reais encontradas na própria aplicação ServeRest ao sondá-la para esta análise — não são defeitos
+produto) agora têm cobertura end-to-end dedicada, além do cadastro de usuário pelo admin, do
+fluxo de adição/remoção na Lista de Compras e da listagem/busca de produtos da Seção 7 (16 casos
+de teste de UI em 7 arquivos), conforme as prioridades definidas na Seção 6. Itens marcados com
+⚠️ são lacunas/inconsistências reais encontradas na própria aplicação ServeRest ao sondá-la para
+esta análise — não são defeitos
 desta suíte de testes.
 
 ---
@@ -170,7 +172,7 @@ instável. Esta seção pontua cada fluxo candidato restante pelo valor de autom
 | ------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------- | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
 | **Formulário de cadastro de usuário** (fluxo principal + erros inline)   | Alto — é a primeira coisa que um novo usuário faz; formulário quebrado = cadastro perdido      | Regras de campo já comprovadas no nível de API    | Baixo (reaproveita o padrão POM do `LoginPage`, um novo page object)                                                                         | ✅ Automatizado — `register-user.cy.js`                                                                                                    |
 | **Formulário de cadastro de produto** (fluxo principal do admin)         | Médio — recurso restrito a admin, perfil de ferramenta interna                                 | Regras de campo já comprovadas no nível de API    | Baixo-médio (exige setup de login como admin + novo page object)                                                                             | ✅ Automatizado — `product-registration.cy.js`                                                                                             |
-| **Listagem/busca de produtos** (`/listarprodutos`)                       | Médio — busca quebrada bloqueia todos os fluxos de carrinho a jusante                          | Endpoint de leitura já coberto (`products.cy.js`) | Baixo                                                                                                                                        | 📋 bom próximo candidato para uma iteração futura                                                                                          |
+| **Listagem/busca de produtos** (catálogo `/home` + `pesquisar`)          | Médio — busca quebrada bloqueia todos os fluxos de carrinho a jusante                          | Endpoint de leitura já coberto (`products.cy.js`) | Baixo                                                                                                                                        | ✅ Automatizado — `product-listing-search.cy.js`                                                                                           |
 | **Trava de envio duplicado / botão** nos formulários                     | Baixo-médio — mais um incômodo de integridade de dados do que um bloqueio                      | Nenhuma (a API já rejeita duplicatas no servidor) | Médio (exige forçar um duplo clique real, naturalmente um pouco instável)                                                                    | 📋 adiar — a rejeição de duplicidade no servidor é a rede de segurança real                                                                |
 | **Redirecionamento por expiração de sessão** (rota protegida)            | Médio — UX confusa de beco sem saída se falhar silenciosamente                                 | Nenhuma                                           | Alto (exige uma forma rápida de forçar um token expirado — ex.: semear o `localStorage` com um JWT já expirado em vez de esperar 10 minutos) | 📋 vale a pena com o truque do `localStorage`, adiado para uma iteração futura                                                             |
 | **Estados de UI para falha de rede** (erros forçados via `cy.intercept`) | Médio — este projeto _vivenciou_ exatamente esse modo de falha com a API pública               | Nenhuma                                           | Baixo (Cypress tem suporte de primeira classe via `cy.intercept`)                                                                            | 📋 alto valor dada a instabilidade real que este projeto enfrentou com a API pública, bom candidato a um 4º teste de UI se a suíte crescer |
@@ -227,6 +229,22 @@ indefinidamente. Causa raiz identificada diretamente no código-fonte do `ServeR
 têm `_id` — logo o predicado do filtro nunca casa e nada é removido. Somente "Limpar Lista"
 (`removeAll`, que apenas sobrescreve o array inteiro) funciona. Capturado como teste de
 caracterização no contexto "Known gaps" de `shopping-list.cy.js`.
+
+### Listagem e busca de produtos (usuário comum)
+
+Correção à lista de candidatos da Seção 6: o recurso de busca (`data-testid="pesquisar"` /
+`"botaoPesquisar"`) fica no **catálogo `/home` do usuário comum** (componente `CardList`), não na
+tela `/admin/listarprodutos` do admin — essa tela do admin é uma tabela simples com ações de
+editar/excluir, sem campo de busca, confirmado lendo diretamente o código-fonte do
+`ServeRest/front` (`src/views/admin/showProducts.js` vs. `src/component/CardList.js`). Digitar um
+termo e clicar em "Pesquisar" chama `GET /produtos?nome=<termo>` (correspondência por substring no
+servidor) e re-renderiza a grade; um termo sem correspondência exibe a mensagem literal "Nenhum
+produto foi encontrado" (sem `data-testid` dedicado, localizado pelo próprio texto).
+
+✅ Automatizado em `product-listing-search.cy.js`: o catálogo lista um produto recém-cadastrado;
+buscar por (uma substring de) seu nome filtra a grade para esse produto e oculta um produto não
+relacionado criado na mesma execução; buscar um termo garantidamente inexistente mostra a
+mensagem de "nenhum resultado" e nenhum card de produto.
 
 ### Admin: Relatórios
 

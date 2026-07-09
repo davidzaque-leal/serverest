@@ -16,6 +16,9 @@ class ClientHomePage extends BasePage {
   elements = {
     searchInput: () => cy.get('[data-testid="pesquisar"]'),
     searchButton: () => cy.get('[data-testid="botaoPesquisar"]'),
+    // The app has no dedicated data-testid for this message (src/component/
+    // NoSearching.js just renders a bare <p>) — matched by its literal copy.
+    noResultsMessage: () => cy.contains('Nenhum produto foi encontrado'),
   };
 
   productCard(nome) {
@@ -24,6 +27,18 @@ class ClientHomePage extends BasePage {
 
   addToShoppingList(nome) {
     this.productCard(nome).find('[data-testid="adicionarNaLista"]').click();
+    return this;
+  }
+
+  /**
+   * Searches the catalog via the "Pesquisar Produtos" input (filters by
+   * `nome` through `GET /produtos?nome=<term>`, a substring match on the
+   * server). Typing alone doesn't filter — the search button must be
+   * clicked.
+   */
+  search(term) {
+    this.elements.searchInput().clear().type(term);
+    this.elements.searchButton().click();
     return this;
   }
 }
