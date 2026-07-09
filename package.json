@@ -15,7 +15,8 @@
     "test:ui": "cross-env CYPRESS_video=true cypress run --spec \"cypress/e2e/ui/**/*.cy.js\"",
     "test:api": "start-server-and-test api:start http://localhost:3000/usuarios cy:run:api",
     "lint": "eslint .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "keywords": [
     "cypress",

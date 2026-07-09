@@ -135,17 +135,17 @@ selectively automated based on the candidate analysis in [Section 6](#6-ui-autom
 
 ## 5. Traceability summary
 
-| Flow                       | Automated scenarios                                                                                                                                                                                   | File                                        |
-| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
-| User Registration (API)    | Create success (admin + non-admin), duplicate e-mail, missing fields, invalid e-mail, invalid `administrador`, blank/long `nome`, malformed JSON, id boundary, GET/DELETE id-validation inconsistency | `cypress/e2e/api/users.cy.js`               |
-| User Registration (UI)     | Happy path + redirect, duplicate e-mail inline error                                                                                                                                                  | `cypress/e2e/ui/register-user.cy.js`        |
-| Login (API)                | Authenticate success, wrong password, non-existent e-mail, missing email, missing password                                                                                                            | `cypress/e2e/api/login.cy.js`               |
-| Login (UI)                 | Authenticate + redirect (regular user), admin login + redirect, invalid credentials + error message                                                                                                   | `cypress/e2e/ui/login.cy.js`                |
-| Product Registration (API) | Create with valid token, reject without token, non-admin 403, duplicate name, `preco`/`quantidade` boundaries, invalid/malformed token, non-numeric `preco`, public read                              | `cypress/e2e/api/products.cy.js`            |
-| Product Registration (UI)  | Admin happy path + redirect to the product listing page                                                                                                                                               | `cypress/e2e/ui/product-registration.cy.js` |
-| User Registration (UI, admin) | Admin registers a user via Cadastrar Usuários, row visible in Listar Usuários + confirmed via API                                                                                                  | `cypress/e2e/ui/admin-register-user.cy.js`  |
-| Shopping List (UI)         | Add product, sum quantity on repeat adds, update quantity via +/-, clear list, decrease-to-zero characterization test (real bug)                                                                      | `cypress/e2e/ui/shopping-list.cy.js`        |
-| UI access                  | Login screen loads with all elements                                                                                                                                                                  | `cypress/e2e/ui/login-access.cy.js`         |
+| Flow                          | Automated scenarios                                                                                                                                                                                   | File                                        |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| User Registration (API)       | Create success (admin + non-admin), duplicate e-mail, missing fields, invalid e-mail, invalid `administrador`, blank/long `nome`, malformed JSON, id boundary, GET/DELETE id-validation inconsistency | `cypress/e2e/api/users.cy.js`               |
+| User Registration (UI)        | Happy path + redirect, duplicate e-mail inline error                                                                                                                                                  | `cypress/e2e/ui/register-user.cy.js`        |
+| Login (API)                   | Authenticate success, wrong password, non-existent e-mail, missing email, missing password                                                                                                            | `cypress/e2e/api/login.cy.js`               |
+| Login (UI)                    | Authenticate + redirect (regular user), admin login + redirect, invalid credentials + error message                                                                                                   | `cypress/e2e/ui/login.cy.js`                |
+| Product Registration (API)    | Create with valid token, reject without token, non-admin 403, duplicate name, `preco`/`quantidade` boundaries, invalid/malformed token, non-numeric `preco`, public read                              | `cypress/e2e/api/products.cy.js`            |
+| Product Registration (UI)     | Admin happy path + redirect to the product listing page                                                                                                                                               | `cypress/e2e/ui/product-registration.cy.js` |
+| User Registration (UI, admin) | Admin registers a user via Cadastrar Usuários, row visible in Listar Usuários + confirmed via API                                                                                                     | `cypress/e2e/ui/admin-register-user.cy.js`  |
+| Shopping List (UI)            | Add product, sum quantity on repeat adds, update quantity via +/-, clear list, decrease-to-zero characterization test (real bug)                                                                      | `cypress/e2e/ui/shopping-list.cy.js`        |
+| UI access                     | Login screen loads with all elements                                                                                                                                                                  | `cypress/e2e/ui/login-access.cy.js`         |
 
 **Every API scenario identified in Sections 1–4 is now automated** (30 API test cases across 3
 files), except the handful explicitly marked 📋 with a stated rationale (session expiration
@@ -198,18 +198,18 @@ are now automated (below); Relatórios remains out of scope by design.
 
 ### Access profiles, as rendered in the UI
 
-| Profile                              | Landing page  | What's shown                                                                                                                   |
-| ------------------------------------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| Admin (`administrador:"true"`)        | `/admin/home` | Five feature cards: **Cadastrar Usuários**, **Listar Usuários**, **Cadastrar Produtos**, **Listar Produtos**, **Relatórios**    |
+| Profile                                | Landing page  | What's shown                                                                                                                                                |
+| -------------------------------------- | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Admin (`administrador:"true"`)         | `/admin/home` | Five feature cards: **Cadastrar Usuários**, **Listar Usuários**, **Cadastrar Produtos**, **Listar Produtos**, **Relatórios**                                |
 | Regular user (`administrador:"false"`) | `/home`       | The product catalog is shown directly (search bar + product grid, each card with an "Adicionar a lista" action) — no separate "browse" step before shopping |
 
 ### Shopping List / Cart flow (regular user)
 
-| Step                                                                | Behavior                                                                                                                             |
-| -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| Adding a product from `/home`                                        | Sends the item to **Lista de Compras** (Shopping List), not directly to a cart                                                    |
-| Shopping List screen                                                  | Lists added items with qty `+`/`-` controls, plus **"Adicionar no carrinho"** and **"Limpar Lista"** actions                       |
-| ⚠️ Cart is unfinished                                                 | "Adicionar no carrinho" does not complete a working cart flow — the cart feature is under construction, per product confirmation. This is a known, intentional gap, not a regression to chase down. |
+| Step                          | Behavior                                                                                                                                                                                            |
+| ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Adding a product from `/home` | Sends the item to **Lista de Compras** (Shopping List), not directly to a cart                                                                                                                      |
+| Shopping List screen          | Lists added items with qty `+`/`-` controls, plus **"Adicionar no carrinho"** and **"Limpar Lista"** actions                                                                                        |
+| ⚠️ Cart is unfinished         | "Adicionar no carrinho" does not complete a working cart flow — the cart feature is under construction, per product confirmation. This is a known, intentional gap, not a regression to chase down. |
 
 ✅ Automated in `shopping-list.cy.js`: adding a product from `/home` and asserting it lands on the
 Shopping List at quantity 1; clearing the list via "Limpar Lista" and asserting the empty-state
