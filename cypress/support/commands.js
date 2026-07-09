@@ -1,3 +1,3 @@
-// Custom commands do Cypress.
-// Comandos reutilizáveis entre specs são registrados aqui via Cypress.Commands.add.
-// Ex.: autenticação via API para preparar o estado antes de um teste de UI.
+// Custom Cypress commands.
+// Reusable commands shared across specs are registered here via
+// Cypress.Commands.add.

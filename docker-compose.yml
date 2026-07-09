@@ -1,8 +1,8 @@
-# Sobe o ambiente local completo do ServeRest para os testes:
-#   - api   -> backend REST na porta 3000 (imagem oficial)
-#   - front -> frontend na porta 3001, buildado apontando para a api local
+# Brings up the full local ServeRest environment for the tests:
+#   - api   -> REST backend on port 3000 (official image)
+#   - front -> frontend on port 3001, built pointing at the local api
 #
-# Uso: docker compose up -d --build --wait
+# Usage: docker compose up -d --build --wait
 services:
   api:
     image: paulogoncalvesbh/serverest:latest

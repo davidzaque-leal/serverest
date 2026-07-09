@@ -1,20 +1,18 @@
-/**
- * Service Object do endpoint de autenticação (POST /login).
- * Encapsula a chamada HTTP, deixando as specs focadas nas assertivas.
- */
-class LoginService {
+import BaseService from './BaseService';
+
+/** Service object for the authentication endpoint (POST /login). */
+class LoginService extends BaseService {
+  constructor() {
+    super('/login');
+  }
+
   /**
-   * Autentica um usuário e retorna a resposta (com o token em body.authorization).
+   * Authenticates a user and returns the response (token in body.authorization).
    * @param {string} email
    * @param {string} password
    */
-  logar(email, password) {
-    return cy.request({
-      method: 'POST',
-      url: `${Cypress.env('apiUrl')}/login`,
-      body: { email, password },
-      failOnStatusCode: false,
-    });
+  login(email, password) {
+    return this.request({ method: 'POST', body: { email, password } });
   }
 }
 

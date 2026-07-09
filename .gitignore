@@ -16,7 +16,7 @@ yarn-error.log*
 cypress.env.json
 .env
 
-# Test reports (gerados em CI)
+# Test reports (generated in CI)
 cypress/results/
 mochawesome-report/
 results/

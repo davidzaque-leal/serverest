@@ -1,5 +1,5 @@
-# Builda o frontend do ServeRest (ServeRest/front) apontando para a API local
-# e serve o bundle estático. O CRA 3.4.3 exige Node 14 para instalar/buildar.
+# Builds the ServeRest frontend (ServeRest/front) pointing at the local API
+# and serves the static bundle. CRA 3.4.3 requires Node 14 to install/build.
 FROM node:14 AS build
 WORKDIR /app
 RUN git clone --depth 1 https://github.com/ServeRest/front.git . \
@@ -7,7 +7,7 @@ RUN git clone --depth 1 https://github.com/ServeRest/front.git . \
   && npm install --no-audit --no-fund --loglevel=error \
   && CI=false npm run build
 
-# Imagem final enxuta que apenas serve os arquivos estáticos (SPA).
+# Slim final image that just serves the static files (SPA).
 FROM node:14-slim
 WORKDIR /app
 RUN npm install -g serve@13 --loglevel=error

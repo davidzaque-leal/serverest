@@ -1,39 +1,65 @@
-# ServeRest — Testes Automatizados (Cypress + JavaScript)
+# ServeRest — Automated Tests (Cypress + JavaScript)
 
-Automação de testes **E2E (frontend)** e de **API** para a aplicação [ServeRest](https://serverest.dev/),
-construída com [Cypress](https://www.cypress.io/) e JavaScript.
+Automated **E2E (frontend)** and **API** tests for the [ServeRest](https://serverest.dev/)
+application, built with [Cypress](https://www.cypress.io/) and JavaScript.
 
 - **Frontend:** https://front.serverest.dev/
 - **API (Swagger):** https://serverest.dev/
 
-## Sobre o projeto
+## About the project
 
-Este repositório contém **3 cenários E2E** validando a interface e **3 cenários de API**
-validando os endpoints da aplicação, organizados com foco em legibilidade, reuso e
-manutenibilidade.
+This repository contains **3 E2E scenarios** validating the interface and **3 API scenarios**
+validating the application endpoints, organized with a focus on readability, reuse and
+maintainability.
 
-> 🚧 Documentação em construção — será complementada ao longo do desenvolvimento.
+> 🚧 Documentation in progress — will be expanded as development continues.
 
-## Estrutura de pastas
+## Local environment
+
+The public ServeRest instance (Google App Engine free tier) occasionally returns `503`
+(cold start / quota), so the suite defaults to a **fully local, deterministic stack** via
+Docker Compose: the API (official image) on port `3000` and the frontend (built from
+[`ServeRest/front`](https://github.com/ServeRest/front), pointed at the local API) on port
+`3001`.
+
+```bash
+npm run stack:up     # builds and starts api + front (waits until healthy)
+npm run test:ui      # runs the UI specs against the local stack
+npm run stack:down   # tears the stack down
+```
+
+Both URLs can be overridden to target the public instance instead:
+
+```bash
+CYPRESS_baseUrl=https://front.serverest.dev CYPRESS_apiUrl=https://serverest.dev npm run cy:run
+```
+
+## Folder structure
 
 ```
 cypress/
 ├── e2e/
-│   ├── ui/          # Cenários E2E (interface)
-│   └── api/         # Cenários de API
+│   ├── ui/          # E2E scenarios (interface)
+│   └── api/         # API scenarios
 ├── support/
-│   ├── pages/       # Page Objects (padrão POM) — camada de UI
-│   ├── services/    # Service Objects — camada de API
-│   └── factories/   # Geração de dados dinâmicos (faker)
-└── fixtures/        # Dados estáticos e massas de teste
+│   ├── pages/       # Page Objects (POM), BasePage + concrete pages — UI layer
+│   ├── services/    # Service Objects, BaseService + concrete services — API layer
+│   └── factories/   # Dynamic test data generation (faker)
+└── fixtures/        # Static data and test fixtures
 ```
 
-## Como executar
-
-> Instruções detalhadas serão adicionadas nos próximos passos.
+## How to run
 
 ```bash
 npm install
-npm run cy:open   # modo interativo
-npm test          # modo headless (CI)
+
+# API tests (spins up a standalone local API automatically)
+npm run test:api
+
+# UI tests (requires the local stack, see above)
+npm run stack:up
+npm run test:ui
+
+# Everything, interactively
+npm run cy:open
 ```

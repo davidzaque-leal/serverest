@@ -1,7 +1,7 @@
 {
   "name": "serverest-cypress-tests",
   "version": "1.0.0",
-  "description": "Testes E2E (UI) e de API para a aplicacao ServeRest usando Cypress e JavaScript",
+  "description": "E2E (UI) and API automated tests for the ServeRest application using Cypress and JavaScript",
   "author": "Davidzaque",
   "license": "MIT",
   "scripts": {

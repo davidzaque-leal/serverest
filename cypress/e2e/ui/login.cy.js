@@ -1,31 +1,31 @@
 import loginPage from '../../support/pages/LoginPage';
-import UsuarioService from '../../support/services/UsuarioService';
-import { gerarUsuario } from '../../support/factories/usuario.factory';
+import UserService from '../../support/services/UserService';
+import { generateUser } from '../../support/factories/user.factory';
 
 describe('UI - Login', () => {
-  context('Credenciais válidas', () => {
-    let usuario;
+  context('Valid credentials', () => {
+    let user;
 
     beforeEach(() => {
-      usuario = gerarUsuario();
-      // Semeia o usuário via API (o mesmo backend que o front consome),
-      // para que o login pela UI encontre credenciais válidas.
-      UsuarioService.criar(usuario).its('status').should('eq', 201);
+      user = generateUser();
+      // Seeds the user via the API (the same backend the front consumes)
+      // so the login form finds valid credentials.
+      UserService.create(user).its('status').should('eq', 201);
     });
 
-    it('deve autenticar e redirecionar para a home', () => {
-      loginPage.visitar();
-      loginPage.fazerLogin(usuario.email, usuario.password);
+    it('should authenticate and redirect to the home page', () => {
+      loginPage.visit();
+      loginPage.login(user.email, user.password);
 
       cy.url().should('include', '/home');
       cy.get('[data-testid="logout"]').should('be.visible');
     });
   });
 
-  context('Credenciais inválidas', () => {
-    it('deve permanecer no login e exibir mensagem de erro', () => {
-      loginPage.visitar();
-      loginPage.fazerLogin('usuario.inexistente@qa.com.br', 'senha-invalida');
+  context('Invalid credentials', () => {
+    it('should stay on the login page and show an error message', () => {
+      loginPage.visit();
+      loginPage.login('nonexistent.user@qa.com.br', 'invalid-password');
 
       cy.contains('Email e/ou senha inválidos').should('be.visible');
       cy.url().should('include', '/login');
