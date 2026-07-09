@@ -1,0 +1,39 @@
+# Sobe o ambiente local completo do ServeRest para os testes:
+#   - api   -> backend REST na porta 3000 (imagem oficial)
+#   - front -> frontend na porta 3001, buildado apontando para a api local
+#
+# Uso: docker compose up -d --build --wait
+services:
+  api:
+    image: paulogoncalvesbh/serverest:latest
+    ports:
+      - '3000:3000'
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "require('http').get('http://localhost:3000/usuarios',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 5s
+
+  front:
+    build:
+      context: ./docker/front
+    ports:
+      - '3001:3001'
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "require('http').get('http://localhost:3001',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 5s

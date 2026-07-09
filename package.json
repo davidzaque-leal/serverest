@@ -9,9 +9,11 @@
     "cy:run": "cypress run",
     "cy:run:api": "cypress run --spec \"cypress/e2e/api/**/*.cy.js\"",
     "api:start": "serverest --port 3000",
-    "test": "start-server-and-test api:start http://localhost:3000/usuarios cy:run",
-    "test:api": "start-server-and-test api:start http://localhost:3000/usuarios cy:run:api",
+    "stack:up": "docker compose up -d --build --wait",
+    "stack:down": "docker compose down",
+    "test": "cypress run",
     "test:ui": "cypress run --spec \"cypress/e2e/ui/**/*.cy.js\"",
+    "test:api": "start-server-and-test api:start http://localhost:3000/usuarios cy:run:api",
     "lint": "eslint .",
     "format": "prettier --write ."
   },

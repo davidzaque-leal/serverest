@@ -16,6 +16,11 @@ yarn-error.log*
 cypress.env.json
 .env
 
+# Test reports (gerados em CI)
+cypress/results/
+mochawesome-report/
+results/
+
 # OS / editor
 .DS_Store
 Thumbs.db
