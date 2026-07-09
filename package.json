@@ -7,7 +7,7 @@
   "scripts": {
     "cy:open": "cypress open",
     "cy:run": "cypress run",
-    "cy:run:api": "cypress run --spec \"cypress/e2e/api/**/*.cy.js\"",
+    "cy:run:api": "cypress run --spec \"cypress/e2e/api/**/*.cy.js\" --config baseUrl=http://localhost:3000",
     "api:start": "serverest --port 3000",
     "stack:up": "docker compose up -d --build --wait",
     "stack:down": "docker compose down",
