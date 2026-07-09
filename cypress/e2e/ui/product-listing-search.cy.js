@@ -1,9 +1,6 @@
 import clientHomePage from '../../support/pages/ClientHomePage';
-import LoginService from '../../support/services/LoginService';
 import UserService from '../../support/services/UserService';
 import ProductService from '../../support/services/ProductService';
-import { generateUser } from '../../support/factories/user.factory';
-import { generateProduct } from '../../support/factories/product.factory';
 
 describe('UI - Product Listing & Search (regular user)', () => {
   let adminId;
@@ -17,38 +14,27 @@ describe('UI - Product Listing & Search (regular user)', () => {
 
   before(() => {
     // Product writes require an admin token.
-    const admin = generateUser();
+    cy.createUserWithToken().then((admin) => {
+      adminId = admin.id;
+      adminToken = admin.token;
 
-    UserService.create(admin).then((response) => {
-      adminId = response.body._id;
-
-      LoginService.login(admin.email, admin.password).then((loginResponse) => {
-        adminToken = loginResponse.body.authorization;
-
-        // Two distinct products so the search test can prove the catalog is
-        // actually filtered (matching product visible, non-matching hidden)
-        // rather than just always showing everything.
-        productA = generateProduct();
-        productB = generateProduct();
-
-        ProductService.create(productA, adminToken).then((response) => {
-          productAId = response.body._id;
-        });
-        ProductService.create(productB, adminToken).then((response) => {
-          productBId = response.body._id;
-        });
+      // Two distinct products so the search test can prove the catalog is
+      // actually filtered (matching product visible, non-matching hidden)
+      // rather than just always showing everything.
+      cy.seedProduct(admin.token).then((seeded) => {
+        productA = seeded.product;
+        productAId = seeded.id;
+      });
+      cy.seedProduct(admin.token).then((seeded) => {
+        productB = seeded.product;
+        productBId = seeded.id;
       });
     });
 
     // The regular (non-admin) user who browses/searches the catalog.
-    const client = generateUser({ administrador: 'false' });
-
-    UserService.create(client).then((response) => {
-      clientId = response.body._id;
-
-      LoginService.login(client.email, client.password).then((loginResponse) => {
-        clientToken = loginResponse.body.authorization;
-      });
+    cy.createUserWithToken({ administrador: 'false' }).then((client) => {
+      clientId = client.id;
+      clientToken = client.token;
     });
   });
 

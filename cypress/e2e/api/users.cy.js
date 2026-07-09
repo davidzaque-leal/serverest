@@ -1,16 +1,27 @@
 import UserService from '../../support/services/UserService';
 import { generateUser } from '../../support/factories/user.factory';
+import { MESSAGES } from '../../support/messages';
 
 describe('API - Users (/usuarios)', () => {
+  // Ids registered by the tests; deleted in afterEach so cleanup still runs
+  // when an assertion fails mid-test (an inline delete would be skipped).
+  const createdUserIds = [];
+
+  afterEach(() => {
+    while (createdUserIds.length) {
+      UserService.delete(createdUserIds.pop());
+    }
+  });
+
   it('should create a user and return 201 with a generated id', () => {
     const user = generateUser();
 
     UserService.create(user).then((response) => {
-      expect(response.status).to.eq(201);
-      expect(response.body.message).to.eq('Cadastro realizado com sucesso');
-      expect(response.body).to.have.property('_id').and.not.be.empty;
+      createdUserIds.push(response.body._id);
 
-      UserService.delete(response.body._id);
+      expect(response.status).to.eq(201);
+      expect(response.body.message).to.eq(MESSAGES.registerSuccess);
+      expect(response.body).to.have.property('_id').and.not.be.empty;
     });
   });
 
@@ -18,9 +29,9 @@ describe('API - Users (/usuarios)', () => {
     const user = generateUser({ administrador: 'false' });
 
     UserService.create(user).then((response) => {
-      expect(response.status).to.eq(201);
+      createdUserIds.push(response.body._id);
 
-      UserService.delete(response.body._id);
+      expect(response.status).to.eq(201);
     });
   });
 
@@ -28,13 +39,13 @@ describe('API - Users (/usuarios)', () => {
     const user = generateUser();
 
     UserService.create(user).then((created) => {
+      createdUserIds.push(created.body._id);
+
       expect(created.status).to.eq(201);
 
       UserService.create(user).then((duplicate) => {
         expect(duplicate.status).to.eq(400);
-        expect(duplicate.body.message).to.eq('Este email já está sendo usado');
-
-        UserService.delete(created.body._id);
+        expect(duplicate.body.message).to.eq(MESSAGES.emailAlreadyInUse);
       });
     });
   });
@@ -80,9 +91,9 @@ describe('API - Users (/usuarios)', () => {
       const user = generateUser({ nome: '   ' });
 
       UserService.create(user).then((response) => {
-        expect(response.status).to.eq(201);
+        createdUserIds.push(response.body._id);
 
-        UserService.delete(response.body._id);
+        expect(response.status).to.eq(201);
       });
     });
 
@@ -90,9 +101,9 @@ describe('API - Users (/usuarios)', () => {
       const user = generateUser({ nome: 'A'.repeat(1000) });
 
       UserService.create(user).then((response) => {
-        expect(response.status).to.eq(201);
+        createdUserIds.push(response.body._id);
 
-        UserService.delete(response.body._id);
+        expect(response.status).to.eq(201);
       });
     });
   });
@@ -121,7 +132,7 @@ describe('API - Users (/usuarios)', () => {
     it('deleting a malformed id returns 200 without validating its shape (inconsistent with GET)', () => {
       UserService.delete('not-a-real-id').then((response) => {
         expect(response.status).to.eq(200);
-        expect(response.body.message).to.eq('Nenhum registro excluído');
+        expect(response.body.message).to.eq(MESSAGES.noRecordDeleted);
       });
     });
   });

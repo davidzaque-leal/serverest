@@ -1,6 +1,7 @@
 import loginPage from '../../support/pages/LoginPage';
 import UserService from '../../support/services/UserService';
 import { generateUser } from '../../support/factories/user.factory';
+import { MESSAGES } from '../../support/messages';
 
 describe('UI - Login', () => {
   context('Valid credentials - regular user', () => {
@@ -52,7 +53,7 @@ describe('UI - Login', () => {
       loginPage.visit();
       loginPage.login('nonexistent.user@qa.com.br', 'invalid-password');
 
-      cy.contains('Email e/ou senha inválidos').should('be.visible');
+      cy.contains(MESSAGES.invalidCredentials).should('be.visible');
       cy.url().should('include', '/login');
       cy.screenshot('login-invalid-credentials-error');
     });

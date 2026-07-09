@@ -1,22 +1,21 @@
-import LoginService from '../../support/services/LoginService';
 import ProductService from '../../support/services/ProductService';
 import UserService from '../../support/services/UserService';
-import { generateUser } from '../../support/factories/user.factory';
 import { generateProduct } from '../../support/factories/product.factory';
+import { MESSAGES } from '../../support/messages';
 
 describe('API - Products (/produtos)', () => {
   let adminId;
   let token;
 
+  // Ids registered by the tests; deleted in afterEach so cleanup still runs
+  // when an assertion fails mid-test (an inline delete would be skipped).
+  const createdProductIds = [];
+  const createdUserIds = [];
+
   before(() => {
-    const admin = generateUser();
-
-    UserService.create(admin).then((response) => {
-      adminId = response.body._id;
-
-      LoginService.login(admin.email, admin.password).then((loginResponse) => {
-        token = loginResponse.body.authorization;
-      });
+    cy.createUserWithToken().then((admin) => {
+      adminId = admin.id;
+      token = admin.token;
     });
   });
 
@@ -24,15 +23,24 @@ describe('API - Products (/produtos)', () => {
     UserService.delete(adminId);
   });
 
+  afterEach(() => {
+    while (createdProductIds.length) {
+      ProductService.delete(createdProductIds.pop(), token);
+    }
+    while (createdUserIds.length) {
+      UserService.delete(createdUserIds.pop());
+    }
+  });
+
   it('should create a product when authenticated with a valid token', () => {
     const product = generateProduct();
 
     ProductService.create(product, token).then((response) => {
-      expect(response.status).to.eq(201);
-      expect(response.body.message).to.eq('Cadastro realizado com sucesso');
-      expect(response.body).to.have.property('_id').and.not.be.empty;
+      createdProductIds.push(response.body._id);
 
-      ProductService.delete(response.body._id, token);
+      expect(response.status).to.eq(201);
+      expect(response.body.message).to.eq(MESSAGES.registerSuccess);
+      expect(response.body).to.have.property('_id').and.not.be.empty;
     });
   });
 
@@ -41,24 +49,18 @@ describe('API - Products (/produtos)', () => {
 
     ProductService.create(product).then((response) => {
       expect(response.status).to.eq(401);
-      expect(response.body.message).to.contain('Token de acesso');
+      expect(response.body.message).to.contain(MESSAGES.accessTokenFragment);
     });
   });
 
   context('Permissions', () => {
     it('should reject creating a product with a valid but non-admin token (403)', () => {
-      const regularUser = generateUser({ administrador: 'false' });
+      cy.createUserWithToken({ administrador: 'false' }).then((regular) => {
+        createdUserIds.push(regular.id);
 
-      UserService.create(regularUser).then((created) => {
-        LoginService.login(regularUser.email, regularUser.password).then((loginResponse) => {
-          const regularToken = loginResponse.body.authorization;
-
-          ProductService.create(generateProduct(), regularToken).then((response) => {
-            expect(response.status).to.eq(403);
-            expect(response.body.message).to.eq('Rota exclusiva para administradores');
-
-            UserService.delete(created.body._id);
-          });
+        ProductService.create(generateProduct(), regular.token).then((response) => {
+          expect(response.status).to.eq(403);
+          expect(response.body.message).to.eq(MESSAGES.adminOnlyRoute);
         });
       });
     });
@@ -69,13 +71,13 @@ describe('API - Products (/produtos)', () => {
       const product = generateProduct();
 
       ProductService.create(product, token).then((created) => {
+        createdProductIds.push(created.body._id);
+
         expect(created.status).to.eq(201);
 
         ProductService.create(product, token).then((duplicate) => {
           expect(duplicate.status).to.eq(400);
-          expect(duplicate.body.message).to.eq('Já existe produto com esse nome');
-
-          ProductService.delete(created.body._id, token);
+          expect(duplicate.body.message).to.eq(MESSAGES.duplicateProductName);
         });
       });
     });
@@ -104,9 +106,9 @@ describe('API - Products (/produtos)', () => {
       const product = generateProduct({ preco: 1 });
 
       ProductService.create(product, token).then((response) => {
-        expect(response.status).to.eq(201);
+        createdProductIds.push(response.body._id);
 
-        ProductService.delete(response.body._id, token);
+        expect(response.status).to.eq(201);
       });
     });
 
@@ -125,9 +127,9 @@ describe('API - Products (/produtos)', () => {
       const product = generateProduct({ quantidade: 0 });
 
       ProductService.create(product, token).then((response) => {
-        expect(response.status).to.eq(201);
+        createdProductIds.push(response.body._id);
 
-        ProductService.delete(response.body._id, token);
+        expect(response.status).to.eq(201);
       });
     });
 
@@ -145,7 +147,7 @@ describe('API - Products (/produtos)', () => {
     it('should reject a garbage/invalid token', () => {
       ProductService.create(generateProduct(), 'Bearer garbage-token-123').then((response) => {
         expect(response.status).to.eq(401);
-        expect(response.body.message).to.contain('Token de acesso');
+        expect(response.body.message).to.contain(MESSAGES.accessTokenFragment);
       });
     });
 
@@ -154,7 +156,7 @@ describe('API - Products (/produtos)', () => {
 
       ProductService.create(generateProduct(), rawToken).then((response) => {
         expect(response.status).to.eq(401);
-        expect(response.body.message).to.contain('Token de acesso');
+        expect(response.body.message).to.contain(MESSAGES.accessTokenFragment);
       });
     });
   });

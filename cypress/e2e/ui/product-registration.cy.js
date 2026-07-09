@@ -1,7 +1,5 @@
 import productPage from '../../support/pages/ProductPage';
-import LoginService from '../../support/services/LoginService';
 import UserService from '../../support/services/UserService';
-import { generateUser } from '../../support/factories/user.factory';
 import { generateProduct } from '../../support/factories/product.factory';
 
 describe('UI - Product Registration (admin)', () => {
@@ -9,14 +7,9 @@ describe('UI - Product Registration (admin)', () => {
   let token;
 
   before(() => {
-    const admin = generateUser();
-
-    UserService.create(admin).then((response) => {
-      adminId = response.body._id;
-
-      LoginService.login(admin.email, admin.password).then((loginResponse) => {
-        token = loginResponse.body.authorization;
-      });
+    cy.createUserWithToken().then((admin) => {
+      adminId = admin.id;
+      token = admin.token;
     });
   });
 

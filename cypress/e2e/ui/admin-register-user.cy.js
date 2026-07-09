@@ -1,5 +1,4 @@
 import adminRegisterUserPage from '../../support/pages/AdminRegisterUserPage';
-import LoginService from '../../support/services/LoginService';
 import UserService from '../../support/services/UserService';
 import { generateUser } from '../../support/factories/user.factory';
 
@@ -7,20 +6,25 @@ describe('UI - User Registration (admin)', () => {
   let adminId;
   let token;
 
+  // Ids registered by the tests; deleted in afterEach so cleanup still runs
+  // when an assertion fails mid-test (an inline delete would be skipped).
+  const createdUserIds = [];
+
   before(() => {
-    const admin = generateUser();
-
-    UserService.create(admin).then((response) => {
-      adminId = response.body._id;
-
-      LoginService.login(admin.email, admin.password).then((loginResponse) => {
-        token = loginResponse.body.authorization;
-      });
+    cy.createUserWithToken().then((admin) => {
+      adminId = admin.id;
+      token = admin.token;
     });
   });
 
   after(() => {
     UserService.delete(adminId);
+  });
+
+  afterEach(() => {
+    while (createdUserIds.length) {
+      UserService.delete(createdUserIds.pop());
+    }
   });
 
   it('should register a new user through the admin form and show it in the user listing page', () => {
@@ -41,7 +45,7 @@ describe('UI - User Registration (admin)', () => {
       const created = response.body.usuarios.find((u) => u.email === newUser.email);
       expect(created, 'user created via the admin form should exist in the API').to.exist;
 
-      UserService.delete(created._id);
+      createdUserIds.push(created._id);
     });
 
     cy.screenshot('admin-register-user-success-listing');
