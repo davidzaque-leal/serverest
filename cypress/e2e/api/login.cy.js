@@ -1,6 +1,7 @@
 import LoginService from '../../support/services/LoginService';
 import UserService from '../../support/services/UserService';
 import { generateUser } from '../../support/factories/user.factory';
+import { MESSAGES } from '../../support/messages';
 
 describe('API - Login (/login)', () => {
   context('Valid credentials', () => {
@@ -21,7 +22,7 @@ describe('API - Login (/login)', () => {
     it('should authenticate a registered user and return a bearer token', () => {
       LoginService.login(user.email, user.password).then((response) => {
         expect(response.status).to.eq(200);
-        expect(response.body.message).to.eq('Login realizado com sucesso');
+        expect(response.body.message).to.eq(MESSAGES.loginSuccess);
         expect(response.body.authorization).to.match(/^Bearer\s.+/);
       });
     });
@@ -45,7 +46,7 @@ describe('API - Login (/login)', () => {
     it('should reject a wrong password for a registered account', () => {
       LoginService.login(user.email, 'wrong-password').then((response) => {
         expect(response.status).to.eq(401);
-        expect(response.body.message).to.eq('Email e/ou senha inválidos');
+        expect(response.body.message).to.eq(MESSAGES.invalidCredentials);
       });
     });
 
@@ -54,7 +55,7 @@ describe('API - Login (/login)', () => {
       // and "e-mail not found", avoiding account enumeration.
       LoginService.login('nonexistent.account@qa.com.br', 'any-password').then((response) => {
         expect(response.status).to.eq(401);
-        expect(response.body.message).to.eq('Email e/ou senha inválidos');
+        expect(response.body.message).to.eq(MESSAGES.invalidCredentials);
       });
     });
   });

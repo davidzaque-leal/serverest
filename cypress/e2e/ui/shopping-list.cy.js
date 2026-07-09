@@ -1,10 +1,7 @@
 import clientHomePage from '../../support/pages/ClientHomePage';
 import shoppingListPage from '../../support/pages/ShoppingListPage';
-import LoginService from '../../support/services/LoginService';
 import UserService from '../../support/services/UserService';
 import ProductService from '../../support/services/ProductService';
-import { generateUser } from '../../support/factories/user.factory';
-import { generateProduct } from '../../support/factories/product.factory';
 
 describe('UI - Shopping List (regular user)', () => {
   let adminId;
@@ -16,30 +13,20 @@ describe('UI - Shopping List (regular user)', () => {
 
   before(() => {
     // Product writes require an admin token.
-    const admin = generateUser();
+    cy.createUserWithToken().then((admin) => {
+      adminId = admin.id;
+      adminToken = admin.token;
 
-    UserService.create(admin).then((response) => {
-      adminId = response.body._id;
-
-      LoginService.login(admin.email, admin.password).then((loginResponse) => {
-        adminToken = loginResponse.body.authorization;
-        product = generateProduct();
-
-        ProductService.create(product, adminToken).then((productResponse) => {
-          productId = productResponse.body._id;
-        });
+      cy.seedProduct(admin.token).then((seeded) => {
+        product = seeded.product;
+        productId = seeded.id;
       });
     });
 
     // The regular (non-admin) user who browses the catalog and shops.
-    const client = generateUser({ administrador: 'false' });
-
-    UserService.create(client).then((response) => {
-      clientId = response.body._id;
-
-      LoginService.login(client.email, client.password).then((loginResponse) => {
-        clientToken = loginResponse.body.authorization;
-      });
+    cy.createUserWithToken({ administrador: 'false' }).then((client) => {
+      clientId = client.id;
+      clientToken = client.token;
     });
   });
 

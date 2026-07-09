@@ -64,6 +64,15 @@ jobs:
       - name: Run API tests
         run: npm run test:api
 
+      - name: Upload API test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-api-report
+          path: cypress/results
+          retention-days: 7
+          if-no-files-found: ignore
+
       - name: Upload API failure screenshots
         if: failure()
         uses: actions/upload-artifact@v4
@@ -110,6 +119,15 @@ jobs:
         if: always()
         run: npm run stack:down
         continue-on-error: true
+
+      - name: Upload UI test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-ui-report
+          path: cypress/results
+          retention-days: 7
+          if-no-files-found: ignore
 
       - name: Upload UI failure evidence
         if: failure()

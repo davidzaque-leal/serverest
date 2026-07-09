@@ -20,6 +20,19 @@ module.exports = defineConfig({
     // var for visual evidence of the UI flows (a --config override does
     // NOT win here, since this value is set explicitly inside `e2e`).
     video: false,
+    // No static fixtures are used — test data is generated on demand by the
+    // factories (cypress/support/factories/).
+    fixturesFolder: false,
+    // HTML report per run (cypress/results/), uploaded as a CI artifact.
+    reporter: 'cypress-mochawesome-reporter',
+    reporterOptions: {
+      reportDir: 'cypress/results',
+      reportPageTitle: 'ServeRest — Test Report',
+      charts: true,
+      embeddedScreenshots: true,
+      inlineAssets: true,
+      overwrite: true,
+    },
     env: {
       // ServeRest backend: used by the API tests and to seed data in the UI
       // tests (it's the same API the front consumes). Defaults to local;
@@ -27,6 +40,7 @@ module.exports = defineConfig({
       apiUrl: 'http://localhost:3000',
     },
     setupNodeEvents(on, config) {
+      require('cypress-mochawesome-reporter/plugin')(on);
       return config;
     },
   },

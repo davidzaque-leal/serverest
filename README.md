@@ -10,8 +10,9 @@ application, built with [Cypress](https://www.cypress.io/) and JavaScript.
 
 This repository automates the three core ServeRest flows — **user registration**, **login**,
 and **product registration** — end-to-end through the UI and at the API level, plus admin user
-registration and the shopping list add/remove flow, organized with a focus on readability, reuse
-and maintainability: 43 test cases (30 API, 13 UI) across 9 spec files. See
+registration, product listing/search and the shopping list add/remove flow, organized with a
+focus on readability, reuse and maintainability: 46 test cases (30 API, 16 UI) across 10 spec
+files. See
 [docs/test-design.md](docs/test-design.md) (🇧🇷
 [PT-BR](docs/test-design.pt-BR.md)) for the full test design analysis: scenario matrices,
 boundary values, coverage traceability, and the rationale behind what was automated vs.
@@ -28,6 +29,14 @@ documented.
 - **Factory** (`cypress/support/factories/`) — `user.factory.js` / `product.factory.js` build
   valid, unique test data via [faker](https://fakerjs.dev/) on demand, with per-field overrides
   for negative scenarios.
+- **Custom commands** (`cypress/support/commands.js`) — cross-cutting API setup shared by the
+  specs: `cy.createUserWithToken()` (creates a user and logs it in, yielding
+  `{ user, id, token }`) and `cy.seedProduct()` (seeds catalog data with an admin token). UI
+  interactions stay in the Page Objects — commands only cover setup that specs would otherwise
+  duplicate in `before()` hooks.
+- **Shared message contract** (`cypress/support/messages.js`) — ServeRest system messages
+  asserted by more than one spec live in a single constant, so a copy change in the app breaks
+  one place instead of scattered string literals.
 
 ## Folder structure
 
@@ -37,13 +46,14 @@ docker-compose.yml       # Local stack: api (official image) + front (built abov
 docs/                    # Test design documentation (EN + PT-BR)
 cypress/
 ├── e2e/
-│   ├── ui/               # E2E specs (login access, login, user/product registration)
+│   ├── ui/               # E2E specs (login, user/product registration, listing/search, shopping list)
 │   └── api/               # API specs (usuarios, login, produtos)
-├── support/
-│   ├── pages/             # Page Objects — BasePage + concrete pages
-│   ├── services/          # Service Objects — BaseService + concrete services
-│   └── factories/         # Dynamic test data generation (faker)
-└── fixtures/              # Static data and test fixtures
+└── support/
+    ├── pages/             # Page Objects — BasePage + concrete pages
+    ├── services/          # Service Objects — BaseService + concrete services
+    ├── factories/         # Dynamic test data generation (faker)
+    ├── commands.js        # Custom commands (cy.createUserWithToken, cy.seedProduct)
+    └── messages.js        # System messages asserted by more than one spec
 ```
 
 ## Local environment
@@ -114,16 +124,21 @@ npm run lint
 npm run format
 ```
 
-## Test evidence
+## Test evidence & reports
 
-`npm run test:ui` records visual evidence for every UI run:
+Every `cypress run` generates an **HTML report**
+([cypress-mochawesome-reporter](https://github.com/LironEr/cypress-mochawesome-reporter)) at
+`cypress/results/index.html`, with per-test results, charts and failure screenshots embedded.
+In CI the report is uploaded as an artifact for both the API and UI jobs.
+
+`npm run test:ui` additionally records visual evidence for every UI run:
 
 - **Video** — one recording per spec file (all its tests), saved to `cypress/videos/`.
 - **Screenshot** — one per test, taken right after its final assertion, saved to
   `cypress/screenshots/<spec>/<name>.png`.
 
-Both are local-only build artifacts (ignored by git, regenerated on every run) — not committed
-to the repository.
+All of these are local-only build artifacts (ignored by git, regenerated on every run) — not
+committed to the repository.
 
 ## Code quality
 
