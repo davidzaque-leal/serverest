@@ -8,11 +8,42 @@ application, built with [Cypress](https://www.cypress.io/) and JavaScript.
 
 ## About the project
 
-This repository contains **3 E2E scenarios** validating the interface and **3 API scenarios**
-validating the application endpoints, organized with a focus on readability, reuse and
-maintainability.
+This repository automates the three core ServeRest flows — **user registration**, **login**,
+and **product registration** — end-to-end through the UI and at the API level, organized with a
+focus on readability, reuse and maintainability: 37 test cases (30 API, 7 UI) across 7 spec
+files. See [docs/test-design.md](docs/test-design.md) (🇧🇷
+[PT-BR](docs/test-design.pt-BR.md)) for the full test design analysis: scenario matrices,
+boundary values, coverage traceability, and the rationale behind what was automated vs.
+documented.
 
-> 🚧 Documentation in progress — will be expanded as development continues.
+## Design patterns
+
+- **Page Object Model** (`cypress/support/pages/`) — `BasePage` centralizes navigation
+  (`visit()`, `visitWithToken()` for admin-only routes); concrete pages (`LoginPage`,
+  `RegisterUserPage`, `ProductPage`) extend it and only declare their own elements/actions.
+- **Service Object** (`cypress/support/services/`) — `BaseService` centralizes URL resolution
+  and request defaults; concrete services (`LoginService`, `UserService`, `ProductService`)
+  extend it instead of duplicating `cy.request` boilerplate per endpoint.
+- **Factory** (`cypress/support/factories/`) — `user.factory.js` / `product.factory.js` build
+  valid, unique test data via [faker](https://fakerjs.dev/) on demand, with per-field overrides
+  for negative scenarios.
+
+## Folder structure
+
+```
+docker/front/           # Dockerfile that builds ServeRest/front pointed at the local API
+docker-compose.yml       # Local stack: api (official image) + front (built above)
+docs/                    # Test design documentation (EN + PT-BR)
+cypress/
+├── e2e/
+│   ├── ui/               # E2E specs (login access, login, user/product registration)
+│   └── api/               # API specs (usuarios, login, produtos)
+├── support/
+│   ├── pages/             # Page Objects — BasePage + concrete pages
+│   ├── services/          # Service Objects — BaseService + concrete services
+│   └── factories/         # Dynamic test data generation (faker)
+└── fixtures/              # Static data and test fixtures
+```
 
 ## Local environment
 
@@ -34,20 +65,6 @@ Both URLs can be overridden to target the public instance instead:
 CYPRESS_baseUrl=https://front.serverest.dev CYPRESS_apiUrl=https://serverest.dev npm run cy:run
 ```
 
-## Folder structure
-
-```
-cypress/
-├── e2e/
-│   ├── ui/          # E2E scenarios (interface)
-│   └── api/         # API scenarios
-├── support/
-│   ├── pages/       # Page Objects (POM), BasePage + concrete pages — UI layer
-│   ├── services/    # Service Objects, BaseService + concrete services — API layer
-│   └── factories/   # Dynamic test data generation (faker)
-└── fixtures/        # Static data and test fixtures
-```
-
 ## How to run
 
 ```bash
@@ -62,4 +79,26 @@ npm run test:ui
 
 # Everything, interactively
 npm run cy:open
+
+# Lint / format
+npm run lint
+npm run format
 ```
+
+## Test evidence
+
+`npm run test:ui` records visual evidence for every UI run:
+
+- **Video** — one recording per spec file (all its tests), saved to `cypress/videos/`.
+- **Screenshot** — one per test, taken right after its final assertion, saved to
+  `cypress/screenshots/<spec>/<name>.png`.
+
+Both are local-only build artifacts (ignored by git, regenerated on every run) — not committed
+to the repository.
+
+## Code quality
+
+- **ESLint** (flat config, `eslint.config.js`) with `eslint-plugin-cypress`'s recommended rules,
+  plus `eslint-config-prettier` to avoid style conflicts.
+- **Prettier** for consistent formatting across the whole project, including this README and
+  the docs.

@@ -15,6 +15,10 @@ module.exports = defineConfig({
       runMode: 2,
       openMode: 0,
     },
+    // Off by default (API specs render no UI, so a video would be a blank
+    // window). `npm run test:ui` overrides this via the CYPRESS_video env
+    // var for visual evidence of the UI flows (a --config override does
+    // NOT win here, since this value is set explicitly inside `e2e`).
     video: false,
     env: {
       // ServeRest backend: used by the API tests and to seed data in the UI

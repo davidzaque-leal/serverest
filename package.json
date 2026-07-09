@@ -12,7 +12,7 @@
     "stack:up": "docker compose up -d --build --wait",
     "stack:down": "docker compose down",
     "test": "cypress run",
-    "test:ui": "cypress run --spec \"cypress/e2e/ui/**/*.cy.js\"",
+    "test:ui": "cross-env CYPRESS_video=true cypress run --spec \"cypress/e2e/ui/**/*.cy.js\"",
     "test:api": "start-server-and-test api:start http://localhost:3000/usuarios cy:run:api",
     "lint": "eslint .",
     "format": "prettier --write ."
@@ -27,6 +27,7 @@
   ],
   "devDependencies": {
     "@faker-js/faker": "^10.5.0",
+    "cross-env": "^10.1.0",
     "cypress": "^15.18.1",
     "eslint": "^10.6.0",
     "eslint-config-prettier": "^10.1.8",
