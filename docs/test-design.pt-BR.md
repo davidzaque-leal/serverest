@@ -144,16 +144,19 @@ análise de candidatos na [Seção 6](#6-análise-de-candidatos-à-automação-d
 | Login (UI)                | Autenticação + redirecionamento (usuário comum), login admin + redirecionamento, credenciais inválidas + mensagem de erro                                                                                                    | `cypress/e2e/ui/login.cy.js`                |
 | Cadastro de Produto (API) | Criação com token válido, rejeição sem token, 403 não-admin, nome duplicado, limites de `preco`/`quantidade`, token inválido/malformado, `preco` não numérico, leitura pública                                               | `cypress/e2e/api/products.cy.js`            |
 | Cadastro de Produto (UI)  | Fluxo principal do admin + redirecionamento para a listagem de produtos                                                                                                                                                      | `cypress/e2e/ui/product-registration.cy.js` |
+| Cadastro de Usuário (UI, admin) | Admin cadastra um usuário via Cadastrar Usuários, linha visível em Listar Usuários + confirmado via API                                                                                                              | `cypress/e2e/ui/admin-register-user.cy.js`  |
+| Lista de Compras (UI)     | Adicionar produto, somar quantidade em adições repetidas, atualizar quantidade via +/-, limpar lista, teste de caracterização da redução a zero (bug real)                                                                   | `cypress/e2e/ui/shopping-list.cy.js`        |
 | Acesso à UI               | Tela de login carrega com todos os elementos                                                                                                                                                                                 | `cypress/e2e/ui/login-access.cy.js`         |
 
 **Todo cenário de API identificado nas Seções 1–4 está automatizado** (30 casos de teste de API
 em 3 arquivos), com exceção do punhado explicitamente marcado com 📋 e justificativa (expiração
 de sessão exige tempo real decorrido; concorrência verdadeira exige contornar a fila serial de
 comandos do Cypress). Os três fluxos centrais de UI (cadastro de usuário, login, cadastro de
-produto) agora têm cobertura end-to-end dedicada (7 casos de teste de UI em 4 arquivos), conforme
-as prioridades definidas na Seção 6. Itens marcados com ⚠️ são lacunas/inconsistências reais
-encontradas na própria aplicação ServeRest ao sondá-la para esta análise — não são defeitos desta
-suíte de testes.
+produto) agora têm cobertura end-to-end dedicada, além do cadastro de usuário pelo admin e do
+fluxo de adição/remoção na Lista de Compras da Seção 7 (13 casos de teste de UI em 6 arquivos),
+conforme as prioridades definidas na Seção 6. Itens marcados com ⚠️ são lacunas/inconsistências
+reais encontradas na própria aplicação ServeRest ao sondá-la para esta análise — não são defeitos
+desta suíte de testes.
 
 ---
 
@@ -187,3 +190,67 @@ de API comprova o contrato do endpoint; o teste de UI comprova que o **formulár
 corretamente conectado a ele — modos de falha diferentes, ambos valem a pena cobrir uma vez
 cada). Todo o restante da tabela acima foi deliberadamente deixado para uma iteração futura —
 automatizá-lo agora trocaria velocidade e estabilidade da suíte por confiança marginal.
+
+---
+
+## 7. Fluxos adicionais: cadastro de usuário pelo admin, lista de compras, relatórios
+
+A exploração manual da UI completa (nos dois perfis de acesso) revelou telas e fluxos fora dos
+três fluxos centrais das Seções 1–3. O cadastro de usuário pelo admin e o fluxo de adicionar/
+remover na lista de compras já estão automatizados (abaixo); Relatórios continua fora de escopo
+por design.
+
+### Perfis de acesso, como renderizados na UI
+
+| Perfil                                | Página inicial | O que é exibido                                                                                                                       |
+| -------------------------------------- | --------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Admin (`administrador:"true"`)         | `/admin/home`   | Cinco cards de funcionalidade: **Cadastrar Usuários**, **Listar Usuários**, **Cadastrar Produtos**, **Listar Produtos**, **Relatórios** |
+| Usuário comum (`administrador:"false"`) | `/home`         | O catálogo de produtos já aparece diretamente (barra de pesquisa + grid de produtos, cada card com ação "Adicionar a lista") — sem etapa separada de "navegação" antes de comprar |
+
+### Fluxo de Lista de Compras / Carrinho (usuário comum)
+
+| Etapa                                                                  | Comportamento                                                                                                                       |
+| ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
+| Adicionar um produto a partir de `/home`                                 | Envia o item para a **Lista de Compras**, não diretamente para um carrinho                                                       |
+| Tela de Lista de Compras                                                 | Lista os itens adicionados com controles de quantidade `+`/`-`, além das ações **"Adicionar no carrinho"** e **"Limpar Lista"** |
+| ⚠️ Carrinho inacabado                                                     | "Adicionar no carrinho" não completa um fluxo de carrinho funcional — a funcionalidade de carrinho está em construção, conforme confirmado. É uma lacuna conhecida e intencional, não uma regressão a investigar. |
+
+✅ Automatizado em `shopping-list.cy.js`: adicionar um produto a partir de `/home` e assertar que
+ele aparece na Lista de Compras com quantidade 1; limpar a lista via "Limpar Lista" e assertar a
+mensagem de estado vazio. As assertivas propositalmente não avançam até "Adicionar no carrinho",
+pela lacuna acima.
+
+⚠️ **Bug real encontrado ao automatizar**: reduzir a quantidade de um único item até 0 (clicar em
+`-` num item com quantidade 1) **não** o remove da lista — ele permanece em "Total: 1"
+indefinidamente. Causa raiz identificada diretamente no código-fonte do `ServeRest/front`
+(`src/services/cart.js`, `deleteItem`): o filtro usa `element.id`, mas os itens do carrinho só
+têm `_id` — logo o predicado do filtro nunca casa e nada é removido. Somente "Limpar Lista"
+(`removeAll`, que apenas sobrescreve o array inteiro) funciona. Capturado como teste de
+caracterização no contexto "Known gaps" de `shopping-list.cy.js`.
+
+### Admin: Relatórios
+
+⚠️ Não implementado — a tela de Relatórios não está pronta. Nenhum caso de teste funcional deve
+mirar essa tela até que seja construída. Se desejado, um teste de caracterização leve (ex.:
+assertar um estado "em construção"/placeholder) poderia servir de guarda contra uma mudança
+silenciosa não anunciada, mas isso é baixa prioridade.
+
+### Admin: Listar Usuários — bug reportado, não reproduzido na stack local
+
+⚠️→✅ **Retestado e não reproduzido**: o relato original era que usuários criados via
+`Cadastrar Usuários` não aparecem em `Listar Usuários`. Ao automatizar
+`admin-register-user.cy.js` contra a stack local em docker (imagem oficial
+`paulogoncalvesbh/serverest` da API + build recente do `ServeRest/front`), o resultado foi o
+oposto: a linha do usuário recém-criado aparece de forma consistente, confirmado em três
+tentativas. O `GET /usuarios` não é paginado (`quantidade` é igual a `usuarios.length`), então
+também não há corte por tamanho de página escondendo linhas novas.
+
+✅ Automatizado como fluxo principal em `admin-register-user.cy.js`: cadastrar um usuário pelo
+formulário do admin e assertar que a linha aparece em `Listar Usuários`, além de confirmar o
+registro via `GET /usuarios`.
+
+📋 Questão em aberto: o relato original pode refletir a instância pública `serverest.dev`, uma
+aba de navegador desatualizada, ou uma condição ainda não identificada — vale confirmar os passos
+exatos de reprodução/ambiente antes de marcar isso como defeito novamente. Se o problema
+reaparecer, adicionar de volta como um teste de caracterização "falha conhecida", seguindo o
+padrão já usado no restante desta suíte (ver o contexto "Known gaps" de `users.cy.js`).

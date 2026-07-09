@@ -9,9 +9,10 @@ application, built with [Cypress](https://www.cypress.io/) and JavaScript.
 ## About the project
 
 This repository automates the three core ServeRest flows — **user registration**, **login**,
-and **product registration** — end-to-end through the UI and at the API level, organized with a
-focus on readability, reuse and maintainability: 37 test cases (30 API, 7 UI) across 7 spec
-files. See [docs/test-design.md](docs/test-design.md) (🇧🇷
+and **product registration** — end-to-end through the UI and at the API level, plus admin user
+registration and the shopping list add/remove flow, organized with a focus on readability, reuse
+and maintainability: 43 test cases (30 API, 13 UI) across 9 spec files. See
+[docs/test-design.md](docs/test-design.md) (🇧🇷
 [PT-BR](docs/test-design.pt-BR.md)) for the full test design analysis: scenario matrices,
 boundary values, coverage traceability, and the rationale behind what was automated vs.
 documented.
@@ -53,13 +54,41 @@ Docker Compose: the API (official image) on port `3000` and the frontend (built 
 [`ServeRest/front`](https://github.com/ServeRest/front), pointed at the local API) on port
 `3001`.
 
+### Prerequisites
+
+- [Docker](https://www.docker.com/) with Compose v2 (`docker compose version` should work).
+- Node.js (for `npm install` / running Cypress itself — not needed inside the containers).
+
+### Bringing the API and the front up
+
 ```bash
-npm run stack:up     # builds and starts api + front (waits until healthy)
-npm run test:ui      # runs the UI specs against the local stack
-npm run stack:down   # tears the stack down
+npm run stack:up     # docker compose up -d --build --wait
 ```
 
-Both URLs can be overridden to target the public instance instead:
+This builds and starts two containers and waits for both to report healthy before returning:
+
+- **`api`** — the official `paulogoncalvesbh/serverest` image, served at
+  `http://localhost:3000`. You can hit it directly, e.g. `curl http://localhost:3000/usuarios`.
+- **`front`** — built by [`docker/front/Dockerfile`](docker/front/Dockerfile), which clones
+  [`ServeRest/front`](https://github.com/ServeRest/front) at build time, patches
+  `src/services/utils.js` so the app calls `http://localhost:3000` instead of the public API,
+  builds the CRA bundle (requires Node 14, handled inside the image), and serves the static
+  build at `http://localhost:3001`. Open that URL in a browser to use the app exactly like the
+  Cypress UI specs do.
+
+The first `stack:up` takes a couple of minutes (cloning + `npm install` + CRA build for the
+front image); subsequent runs reuse the Docker build cache and start in seconds. Rerunning
+`npm run stack:up` is safe/idempotent — Compose recreates only what changed.
+
+### Stopping it
+
+```bash
+npm run stack:down   # docker compose down (removes the containers)
+```
+
+### Running against the public instance instead
+
+Both URLs can be overridden to skip the local stack entirely and target the public instance:
 
 ```bash
 CYPRESS_baseUrl=https://front.serverest.dev CYPRESS_apiUrl=https://serverest.dev npm run cy:run

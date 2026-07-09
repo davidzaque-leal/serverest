@@ -143,13 +143,16 @@ selectively automated based on the candidate analysis in [Section 6](#6-ui-autom
 | Login (UI)                 | Authenticate + redirect (regular user), admin login + redirect, invalid credentials + error message                                                                                                   | `cypress/e2e/ui/login.cy.js`                |
 | Product Registration (API) | Create with valid token, reject without token, non-admin 403, duplicate name, `preco`/`quantidade` boundaries, invalid/malformed token, non-numeric `preco`, public read                              | `cypress/e2e/api/products.cy.js`            |
 | Product Registration (UI)  | Admin happy path + redirect to the product listing page                                                                                                                                               | `cypress/e2e/ui/product-registration.cy.js` |
+| User Registration (UI, admin) | Admin registers a user via Cadastrar Usuários, row visible in Listar Usuários + confirmed via API                                                                                                  | `cypress/e2e/ui/admin-register-user.cy.js`  |
+| Shopping List (UI)         | Add product, sum quantity on repeat adds, update quantity via +/-, clear list, decrease-to-zero characterization test (real bug)                                                                      | `cypress/e2e/ui/shopping-list.cy.js`        |
 | UI access                  | Login screen loads with all elements                                                                                                                                                                  | `cypress/e2e/ui/login-access.cy.js`         |
 
 **Every API scenario identified in Sections 1–4 is now automated** (30 API test cases across 3
 files), except the handful explicitly marked 📋 with a stated rationale (session expiration
 requires real elapsed time; true concurrency needs bypassing Cypress's serial command queue). All
 three core UI flows (user registration, login, product registration) now have dedicated
-end-to-end coverage (7 UI test cases across 4 files), per the priorities set in Section 6.
+end-to-end coverage, plus admin user registration and the shopping list add/remove flow from
+Section 7 (13 UI test cases across 6 files), per the priorities set in Section 6.
 Items marked ⚠️ are genuine gaps/inconsistencies found in the ServeRest application itself while
 probing it for this analysis — not defects in this test suite.
 
@@ -184,3 +187,64 @@ UI-level coverage overlap with the API suite (the API suite proves the endpoint'
 UI test proves the **form** wires up to it correctly — different failure modes, both worth
 covering once each). Everything else in the table above is deliberately left for a future
 iteration — automating it now would trade suite speed and stability for marginal confidence.
+
+---
+
+## 7. Additional flows: admin user registration, shopping list, reports
+
+Manual exploration of the full UI (both access profiles) surfaced screens and flows outside the
+three core flows in Sections 1–3. Admin user registration and the shopping list add/remove flow
+are now automated (below); Relatórios remains out of scope by design.
+
+### Access profiles, as rendered in the UI
+
+| Profile                              | Landing page  | What's shown                                                                                                                   |
+| ------------------------------------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Admin (`administrador:"true"`)        | `/admin/home` | Five feature cards: **Cadastrar Usuários**, **Listar Usuários**, **Cadastrar Produtos**, **Listar Produtos**, **Relatórios**    |
+| Regular user (`administrador:"false"`) | `/home`       | The product catalog is shown directly (search bar + product grid, each card with an "Adicionar a lista" action) — no separate "browse" step before shopping |
+
+### Shopping List / Cart flow (regular user)
+
+| Step                                                                | Behavior                                                                                                                             |
+| -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Adding a product from `/home`                                        | Sends the item to **Lista de Compras** (Shopping List), not directly to a cart                                                    |
+| Shopping List screen                                                  | Lists added items with qty `+`/`-` controls, plus **"Adicionar no carrinho"** and **"Limpar Lista"** actions                       |
+| ⚠️ Cart is unfinished                                                 | "Adicionar no carrinho" does not complete a working cart flow — the cart feature is under construction, per product confirmation. This is a known, intentional gap, not a regression to chase down. |
+
+✅ Automated in `shopping-list.cy.js`: adding a product from `/home` and asserting it lands on the
+Shopping List at quantity 1; clearing the list via "Limpar Lista" and asserting the empty-state
+message. Assertions deliberately stop short of "Adicionar no carrinho" per the gap above.
+
+⚠️ **Real bug found while automating**: decreasing a single item's quantity down to 0 (clicking
+`-` on an item at quantity 1) does **not** remove it from the list — it stays at "Total: 1"
+indefinitely. Root cause read directly from `ServeRest/front` source
+(`src/services/cart.js`, `deleteItem`): it filters the stored array on `element.id`, but cart
+items only ever have `_id` — so the filter predicate never matches and nothing is removed. Only
+"Limpar Lista" (`removeAll`, which just overwrites the whole array) works. Captured as a
+characterization test in `shopping-list.cy.js`'s "Known gaps" context.
+
+### Admin: Relatórios (Reports)
+
+⚠️ Not implemented — the Relatórios screen is not ready. No functional test cases should target
+it until it's built. If desired, a lightweight characterization test (e.g. asserting an
+"em construção" / placeholder state) could guard against an unannounced silent change, but this
+is low priority.
+
+### Admin: Listar Usuários — reported bug, not reproduced against the local stack
+
+⚠️→✅ **Re-tested and not reproduced**: the user originally reported that users created via
+`Cadastrar Usuários` don't appear in `Listar Usuários`. Automating `admin-register-user.cy.js`
+against the local docker stack (official `paulogoncalvesbh/serverest` API image + a fresh
+`ServeRest/front` build) shows the opposite: the newly created user's row renders reliably,
+confirmed across three retries. `GET /usuarios` is unpaginated (`quantidade` equals
+`usuarios.length`), so there's no page-size cutoff hiding new rows either.
+
+✅ Automated as the happy path in `admin-register-user.cy.js`: register a user through the admin
+form and assert the row is visible in `Listar Usuários`, plus confirm the record via
+`GET /usuarios`.
+
+📋 Open question: the original report may reflect the public `serverest.dev` instance, a stale
+browser tab, or a condition not yet identified — worth confirming the exact repro steps/environment
+before re-flagging this as a defect. If it resurfaces, add it back as a "known failing"
+characterization test per the pattern used elsewhere in this suite (see `users.cy.js`'s "Known
+gaps" context).
